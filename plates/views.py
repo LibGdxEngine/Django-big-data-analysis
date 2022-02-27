@@ -1,7 +1,11 @@
+import numpy as np
 from django.shortcuts import render
 import pandas as pd
+
+from csvs.models import Csv
 from .utils import get_simple_plots
 from .forms import PurchaseForm
+from .models import Plate
 
 
 # Create your views here.
@@ -9,62 +13,55 @@ from .forms import PurchaseForm
 def plate_graphs_view(request):
     graph = None
     error_message = None
-    df = None
-    price = None
-    try:
-        # products_df = pd.DataFrame(Product.objects.all().values())
-        # purchases_df = pd.DataFrame(Purchase.objects.all().values())
-        # products_df['product_id'] = products_df['id']
+    selected_csv_file = None
+    csv_files = None
+    provided_samples = None
+    plates_df = pd.DataFrame(Plate.objects.all().values())
 
-        # if purchases_df.shape[0] > 0:
-        #     df = pd.merge(purchases_df, products_df, on='product_id') \
-        #         .drop(['id_y', 'date_y'], axis=1) \
-        #         .rename({'id_x': 'id', 'date_x': 'date'}, axis=1)
-        #     price = df['price']
-            if request.method == 'POST':
-                emirate = request.POST.get('emirate')
-                attribute = request.POST.get('attribute')
-                result_type = request.POST.get('result_type')
-                data_info = request.POST.get('data_info')
-                # df['date'] = df['date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-                # df2 = df.groupby('date', as_index=False)['total_price'].agg('sum')
-                # if chart_type != "":
-                #     if date_from != "" and date_to != "":
-                #         df = df[(df['date'] > date_from) & (df['date'] < date_to)]
-                #
-                # #     graph = get_simple_plots(chart_type, x=df2['date'], y=df2['total_price'], data=df)
-                # else:
-                #     error_message = "Please select a chart type!"
-                print(emirate, attribute, result_type + " by " + data_info)
-        # else:
-        #     error_message = "No records in database"
+    all_emirates = plates_df[["predicted_emirate", "gt_emirate"]].values.ravel()
+    all_emirates = pd.unique(all_emirates)
+    emirates_plates_count = plates_df['gt_emirate'].value_counts().values
+
+    emirates_colors = plates_df[['gt_emirate', 'gt_color']].agg('-'.join, axis=1)
+    emirates_colors_count = emirates_colors.value_counts().values
+    emirates_colors = pd.unique(emirates_colors)
+
+    try:
+
+        provided_samples = plates_df['id'].count()
+        csv_files = pd.DataFrame(Csv.objects.all().values()).get("file_name").astype(str).values.tolist()
+        selected_csv_file = csv_files[0]
+
+        if request.method == 'POST':
+            if request.POST.get("csv_file"):
+                selected_csv_file = request.POST.get("csv_file")
+
+            emirate = request.POST.get('emirate')
+            attribute = request.POST.get('attribute')
+            result_type = request.POST.get('result_type')
+            data_info = request.POST.get('data_info')
+
+
+            if data_info == "emirate":
+                # print(emirates_plates_count, all_emirates)
+                graph = get_simple_plots('bar plot', x=all_emirates, y=emirates_plates_count,
+                                         emirate=emirate, attribute=attribute,
+                                         result_type=result_type, data_info=data_info)
+            else:
+                # print(emirates_plates_count, all_emirates)
+                graph = get_simple_plots('bar plot', x=emirates_colors, y=emirates_colors_count,
+                                         emirate=emirate, attribute=attribute,
+                                         result_type=result_type, data_info=data_info)
+            # df['date'] = df['date'].apply(lambda x: x.strftime('%Y-%m-%d'))
+            # df2 = df.groupby('date', as_index=False)['total_price'].agg('sum')
     except:
-        products_df = None
-        purchases_df = None
-        error_message = "No records in database"
+        error_message = "Ups. Something went wrong!"
 
     context = {
         'graph': graph,
-        'price': price,
         'error_message': error_message,
+        'csv_files': csv_files,
+        'selected_csv_file': selected_csv_file,
+        'provided_samples': provided_samples,
     }
     return render(request, 'products/main.html', context)
-
-
-def add_purchase_view(request):
-    added_message = None
-    form = PurchaseForm(request.POST or None)
-
-    if form.is_valid():
-        obj = form.save(commit=False)
-        obj.salesman = request.user
-        obj.save()
-
-        form = PurchaseForm()
-        added_message = "The message has been added"
-    context = {
-        'form': form,
-        'added_message': added_message,
-    }
-
-    return render(request, 'products/add.html', context)

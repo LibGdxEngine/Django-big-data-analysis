@@ -1,19 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %} Home{% endblock title %}
+{% block title %}Plate-Go Data Analysis{% endblock title %}
 
 {% block content %}
 
     <div class="ui modal mymodal">
-        <div class="header">Price data</div>
+        <div class="header">General info</div>
         <div class="ui container">
             <ul>
-                <li><strong>Count: </strong>{{ price.count }}</li>
-                <li><strong>Mean: </strong>{{ price.mean|floatformat }}</li>
-                <li><strong>Median: </strong>{{ price.median }}</li>
-                <li><strong>Min: </strong>{{ price.min }}</li>
-                <li><strong>Max: </strong>{{ price.max }}</li>
-                <li><strong>Std dev: </strong>{{ price.std|floatformat }}</li>
+                <li><strong>Number of samples provided: </strong>{{ provided_samples }}</li>
+                <li><strong>Bar information provided: </strong><span>&#x2718;</span></li>
+                <li><strong>Candidate Results provided: </strong><span>&#x2714;</span></li>
+                <li><strong>Manual Annotation/Validation: </strong>&#x2718;</li>
+            </ul>
+            <ul>
+                <li><strong>API version: </strong>1.2</li>
+                <li><strong>Client version: </strong>1.3</li>
+                <li><strong>LPR version: </strong>1.12</li>
+                <li><strong>LPD version: </strong>2.3</li>
             </ul>
         </div>
     </div>
@@ -32,7 +36,24 @@
         <br>
         <form action="" method="post">
             {% csrf_token %}
-            <div class="ui form">
+
+            <div class="field">
+                <label>Csv File</label>
+                <div class="ui selection dropdown field-with">
+                    <input type="hidden" name="csv_file">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">{{ selected_csv_file }}</div>
+                    <div class="menu">
+                        {% for file in csv_files %}
+                            <div class="item {% ifequal file selected_csv_file %}active{% endifequal %}">
+                                {{ file }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="ui form mtop">
                 <div class="three fields">
                     <div class="field">
                         <label>Emirate</label>
@@ -58,6 +79,7 @@
                             <div class="menu">
                                 <div class="item" value="bar">Plates</div>
                                 <div class="item" value="line">Plates Error</div>
+                                <div class="item" value="line">Attributes Error</div>
                             </div>
                         </div>
                     </div>
@@ -84,6 +106,7 @@
                                 <div class="item" value="bar">Time (Hours)</div>
                                 <div class="item" value="line">Emirate</div>
                                 <div class="item" value="count">Emirate-Color</div>
+                                <div class="item" value="count">Attribute-Type</div>
                             </div>
                         </div>
                     </div>
@@ -93,6 +116,9 @@
                 <button class='ui primary button' type='submit'>Generate Graph</button>
             </div>
         </form>
+        <div class="block-center">
+            <button class='ui positive button' id="model-btn">See Summary</button>
+        </div>
 
         <div class="block-center">
             {% if request.POST %}
@@ -101,44 +127,12 @@
                 {% endif %}
             {% endif %}
         </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
     </div>
-    {#        <form action="" method="POST" class="ui form mtop">#}
-    {#            {% csrf_token %}#}
-    {#            <div class="field">#}
-    {#                <label>Choose a chart type: </label>#}
-    {#                <div class="ui selection dropdown">#}
-    {#                    <input type="hidden" name="sales">#}
-    {#                    <i class="dropdown icon"></i>#}
-    {#                    <div class="default text">----</div>#}
-    {#                    <div class="menu">#}
-    {#                        <div class="item" value="bar">Bar plot</div>#}
-    {#                        <div class="item" value="line">Line plot</div>#}
-    {#                        <div class="item" value="count">Count plot</div>#}
-    {#                    </div>#}
-    {#                </div>#}
-    {#            </div>#}
-    {#            <div class="field">#}
-    {#                <div class="two fields">#}
-    {#                    <div class="field">#}
-    {#                        <label>Date from: </label>#}
-    {#                        <input type="date" name="date_from">#}
-    {#                    </div>#}
-    {#                    <div class="field">#}
-    {#                        <label>Date to: </label>#}
-    {#                        <input type="date" name="date_to">#}
-    {#                    </div>#}
-    {#                </div>#}
-    {#            </div>#}
-    {#            <div class="block-center">#}
-    {#                <button class='ui primary button' type='submit'>Select</button>#}
-    {#            </div>#}
-    {#        </form>#}
-    {#        <div class="block-center">#}
-    {#            <button class="ui secondary button" id="model-btn">See summary</button>#}
-    {#            <br>#}
-    {#            <a href={% url 'plates:add-purchase-view' %}>#}
-    {#                <button class="ui positive button">Add records</button>#}
-    {#            </a>#}
-    {#        </div>#}
-
 {% endblock content %}

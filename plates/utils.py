@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
 from io import BytesIO
 import base64
@@ -28,9 +29,13 @@ def get_simple_plots(chart_type, *args, **kwargs):
     fig = plt.figure(figsize=(10, 4))
     x = kwargs.get('x')
     y = kwargs.get('y')
-    data = kwargs.get('data')
+    emirate = kwargs.get('emirate')
+    attribute = kwargs.get('attribute')
+    result_type = kwargs.get('result_type')
+    data_info = kwargs.get('data_info')
+    # data = kwargs.get('data')
     if chart_type == 'bar plot':
-        title = 'total price by day (bar)'
+        title = '{} {} {} by {}'.format(str(emirate).capitalize(), attribute, result_type, data_info)
         plt.title(title)
         plt.bar(x, y)
     elif chart_type == 'line plot':
@@ -40,7 +45,7 @@ def get_simple_plots(chart_type, *args, **kwargs):
     else:
         title = 'Products count'
         plt.title(title)
-        sns.countplot('name', data=data)
+        # sns.countplot('name', data=data)
     plt.xticks(rotation=45)
     plt.tight_layout()
     graph = get_image()
