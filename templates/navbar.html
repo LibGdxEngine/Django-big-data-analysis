@@ -1,0 +1,16 @@
+{% url 'plates:main-plates-view' as path_to_performance %}
+{% url 'csvs:upload-view' as upload_csv_view %}
+
+<div class="ui secondary pointing menu">
+  <a href="{{ path_to_performance }}" class="{% if request.path == path_to_performance %}active{% endif %} item">
+    Analytics
+  </a>
+  <a href="{{ upload_csv_view }}" class="{% if request.path == upload_csv_view %}active{% endif %} item">
+    Upload File
+  </a>
+  <div class="right menu">
+    <a class="ui item">
+      Logout
+    </a>
+  </div>
+</div>

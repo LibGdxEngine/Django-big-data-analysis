@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %} Home{% endblock title %}
+
+{% block content %}
+    {% if is_loading %}
+        <div class="ui active centered inline loader"></div>
+    {% endif %}
+    {% if success_message %}
+        <div class="ui success message">
+            <i class="close icon"></i>
+            <div class="header">
+                {{ success_message }}
+            </div>
+        </div>
+    {% endif %}
+    {% if error_message %}
+        <div class="ui negative message">
+            <i class="close icon"></i>
+            <div class="header">
+                {{ error_message }}
+            </div>
+        </div>
+    {% endif %}
+    <h1>Upload your csv</h1>
+
+    <form action="" method="post" enctype="multipart/form-data" class="ui form">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit" class="ui positive button">Add Data</button>
+    </form>
+{% endblock %}
