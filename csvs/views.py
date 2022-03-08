@@ -9,13 +9,9 @@ from plates.models import Plate
 from django.contrib.auth.decorators import login_required
 
 
-# Create your views here.
-
-
 def upload_csv_view(request):
     error_message = None
     success_message = None
-    is_loading = None
     form = CsvForm(request.POST or None, request.FILES or None)
     if form.is_valid():
         form.save()
@@ -24,34 +20,37 @@ def upload_csv_view(request):
             obj = Csv.objects.get(activated=False)
             with open(obj.file_name.path, 'r') as f:
                 reader = csv.reader(f)
-                is_loading = True
+
                 for index, row in enumerate(reader):
                     if index != 0:
+                        if str(row[1]):
+                            image_hour = row[1].split(" ")[1].split(":")[0]
                         plate, _ = Plate.objects.get_or_create(
                             csv_file=obj.file_name,
                             image_path=row[0],
-                            predicted_code=row[1],
-                            predicted_number=row[2],
-                            predicted_emirate=row[3],
-                            predicted_color=row[4],
-                            gt_code=row[5],
-                            gt_number=row[6],
-                            gt_emirate=row[7],
-                            gt_color=row[8],
+                            image_time=image_hour,
+                            gt_color=row[2],
+                            gt_emirate=row[3],
+                            gt_code=row[4],
+                            gt_number=row[5],
+                            description=row[6],
+                            predicted_code=row[7],
+                            predicted_color=row[8],
+                            predicted_number=row[9],
+                            predicted_emirate=row[10],
+                            status=row[11],
                         )
                         print(index, "done")
 
             obj.activated = True
             obj.save()
-            success_message = "Uploaded sucessfully"
+            success_message = "Uploaded successfully"
         except:
             error_message = "Ups. Something went wrong...."
-        finally:
-            is_loading = False
+
     context = {
         'form': form,
         'success_message': success_message,
         'error_message': error_message,
-        'is_loading': is_loading,
     }
     return render(request, 'csvs/upload.html', context)

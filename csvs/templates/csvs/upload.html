@@ -3,9 +3,6 @@
 {% block title %} Home{% endblock title %}
 
 {% block content %}
-    {% if is_loading %}
-        <div class="ui active centered inline loader"></div>
-    {% endif %}
     {% if success_message %}
         <div class="ui success message">
             <i class="close icon"></i>
