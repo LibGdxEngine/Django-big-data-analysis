@@ -22,8 +22,9 @@ def plate_graphs_view(request):
 
     try:
         plates_df = pd.DataFrame(Plate.objects.all().values())
+        plates_df = plates_df[plates_df['gt_emirate'].isin(['AUH', 'DXB', 'SHJ', 'UMQ', 'RKH', 'AJM', 'FJH'])]
     except:
-        error_message = "No data records found in database!"
+        pass
 
     # try:
     provided_samples = plates_df['id'].count()

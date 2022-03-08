@@ -51,11 +51,10 @@ def generate_all_plates_count_by_time(plates_df):
 
 
 def generate_all_plates_count_by_emirate_graph(df):
-    all_emirates = df[["predicted_emirate", "gt_emirate"]].values.ravel()
-    all_emirates = pd.unique(all_emirates)
+    categories, values = unpackGroups(df.groupby([df['gt_emirate']]).size())
     emirates_plates_count = df['gt_emirate'].value_counts().values
     plt.title("All plates count by emirate")
-    plt.bar(all_emirates, emirates_plates_count)
+    plt.bar(categories, values)
     plt.xticks(rotation=45)
     plt.tight_layout()
     graph = get_image()
@@ -152,6 +151,10 @@ def generate_all_plates_error_count_by_time(plates_df):
 
 def generate_all_attributes_error_count_by_time(plates_df):
     errors = plate_error(plates_df)
+    hours = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18',
+             '19', '20', '21', '22', '23', '24']
+    hours = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+             19, 20, 21, 22, 23, 24]
     attributes = ['Number', 'Color', 'Emirate', 'Code']
     counts = []
     for attribute in attributes:
@@ -160,6 +163,25 @@ def generate_all_attributes_error_count_by_time(plates_df):
         counts.append(plates_df[plates_df[pred_attribute] != plates_df[gt_attribute]].shape[0])
 
     sns.set_theme(style="whitegrid")
-    sns.boxplot(x=attributes, y=counts, data=counts)
+    f, ax = plt.subplots(figsize=(6, 15))
+
+    errors['gt_code'] = pd.to_numeric(errors['gt_code'], errors='ignore')
+    # print(errors['gt_code'])
+    # Plot the total crashes
+    sns.set_color_codes("pastel")
+    sns.barplot(x=attributes, y=hours,
+                label="Total", color="b")
+    # Plot the crashes where alcohol was involved
+    sns.set_color_codes("muted")
+    sns.barplot(x="gt_code", y=hours,
+                label="Alcohol-involved", color="b")
+    # Add a legend and informative axis label
+    ax.legend(ncol=2, loc="lower right", frameon=True)
+    ax.set(xlim=(0, 24), ylabel="",
+           xlabel="Automobile collisions per billion miles")
+    sns.despine(left=True, bottom=True)
+
+    df = pd.DataFrame(data=errors, )
+    sns.boxplot(x=counts, y=attributes, data=pd.melt(df))
     graph = get_image()
     return graph
